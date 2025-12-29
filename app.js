@@ -30,10 +30,10 @@ const connectDB = async () => {
 connectDB()
 
 // Import routes
-const authRoutes = require('./routes/authRoutes')
+const authRoutes = require('./src/modules/auth/authRoutes')
 const userRoutes = require('./src/modules/users/userRoutes')
-const productRoutes = require('./routes/productRoutes')
-const orderRoutes = require('./routes/orderRoutes')
+const productRoutes = require('./src/modules/products/productRoutes')
+const orderRoutes = require('./src/modules/orders/orderRoutes')
 const notificationRoutes = require('./src/modules/notifications/notificationRoutes')
 
 // Error handler middleware
