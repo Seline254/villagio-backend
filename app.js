@@ -35,16 +35,20 @@ const userRoutes = require('./src/modules/users/userRoutes')
 const productRoutes = require('./src/modules/products/productRoutes')
 const orderRoutes = require('./src/modules/orders/orderRoutes')
 const notificationRoutes = require('./src/modules/notifications/notificationRoutes')
+const farmerProfileRoutes = require('./src/modules/farmers/farmerProfileRoutes')
+const dashboardRoutes = require('./src/modules/dashboard/dashboardRoutes')
 
 // Error handler middleware
 const errorHandler = require('./src/middleware/errorHandler')
 
 // API Routes
-app.use('/api/users', authRoutes)
+app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/farmers', farmerProfileRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // Health check route
 app.get('/health', (req, res) => {

@@ -9,6 +9,11 @@ exports.uploadProductImages = upload.array('images', 5)
 // Add product
 exports.addProduct = async (req, res) => {
     try {
+        // Check if user is a farmer
+        if (req.user.userType !== 'farmer') {
+            return res.status(403).json({ message: 'Only farmers can add products' })
+        }
+
         let images = []
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
@@ -66,15 +71,21 @@ exports.getProductById = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
     try {
+        const product = await Product.findById(req.params.id)
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' })
+        }
+
+        if (product.farmer.toString() !== req.user.userId) {
+            return res.status(403).json({ message: 'You can only update your own products' })
+        }
+
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true }
         )
-
-        if (!updatedProduct) {
-            return res.status(404).json({ message: 'Product not found' })
-        }
 
         res.status(200).json(updatedProduct)
     } catch (error) {
@@ -85,11 +96,17 @@ exports.updateProduct = async (req, res) => {
 // Delete product
 exports.deleteProduct = async (req, res) => {
     try {
-        const deletedProduct = await Product.findByIdAndDelete(req.params.id)
+        const product = await Product.findById(req.params.id)
 
-        if (!deletedProduct) {
+        if (!product) {
             return res.status(404).json({ message: 'Product not found' })
         }
+
+        if (product.farmer.toString() !== req.user.userId) {
+            return res.status(403).json({ message: 'You can only delete your own products' })
+        }
+
+        await Product.findByIdAndDelete(req.params.id)
 
         res.status(200).json({ message: 'Product deleted successfully' })
     } catch (error) {

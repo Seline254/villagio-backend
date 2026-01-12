@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema({
     },
     category: {
         type: String,
+        enum: ['Vegetables', 'Fruits', 'Dairy and Eggs', 'Herbs and Spices', 'Grains and Cereals'],
         required: true
     },
     price: {

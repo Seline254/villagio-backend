@@ -1,4 +1,5 @@
 const { Order, OrderItem } = require('../../models/orderDB')
+const { Product } = require('../../models/productDB')
 
 // Create order
 exports.createOrder = async (req, res) => {
@@ -8,6 +9,17 @@ exports.createOrder = async (req, res) => {
         if (!items || items.length === 0) {
             return res.status(400).json({ message: 'Order must contain at least one item' })
         }
+
+        // Assume all items from same farmer
+        const firstProduct = await Product.findById(items[0].productId).populate('farmer', 'name')
+        if (!firstProduct) {
+            return res.status(400).json({ message: 'Invalid product' })
+        }
+
+        const vendor = firstProduct.farmer
+        const vendorNameParts = vendor.name.split(' ')
+        const vendorFirstName = vendorNameParts[0] || ''
+        const vendorLastName = vendorNameParts.slice(1).join(' ') || ''
 
         let totalAmount = 0
         const orderItems = []
@@ -23,6 +35,8 @@ exports.createOrder = async (req, res) => {
 
         const newOrder = new Order({
             consumer: req.user.userId,
+            vendorFirstName,
+            vendorLastName,
             items: orderItems,
             totalAmount,
             deliveryAddress,

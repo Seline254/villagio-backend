@@ -33,13 +33,39 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
         default: 'pending'
     },
-    deliveryAddress: {
+    vendorFirstName: {
         type: String,
         required: true
     },
+    vendorLastName: {
+        type: String,
+        required: true
+    },
+    deliveryAddress: {
+        phone: {
+            type: String,
+            required: true
+        },
+        streetAddress: {
+            type: String,
+            required: true
+        },
+        city: {
+            type: String,
+            required: true
+        },
+        county: {
+            type: String,
+            required: true
+        },
+        postalCode: {
+            type: String,
+            required: true
+        }
+    },
     paymentMethod: {
         type: String,
-        enum: ['cash_on_delivery', 'mobile_money', 'card'],
+        enum: ['mpesa', 'credit', 'debit', 'cash_on_delivery'],
         default: 'cash_on_delivery'
     },
     paymentStatus: {
