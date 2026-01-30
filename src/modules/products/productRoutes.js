@@ -8,7 +8,7 @@ router.post('/', authMiddleware, roleMiddleware(['farmer']), productController.u
 router.get('/', productController.getAllProducts)
 router.get('/search', productController.searchProducts)
 router.get('/:id', productController.getProductById)
-router.put('/:id', authMiddleware, roleMiddleware(['farmer']), productController.updateProduct)
+router.put('/:id', authMiddleware, roleMiddleware(['farmer']), productController.uploadProductImages,productController.updateProduct)
 router.delete('/:id', authMiddleware, roleMiddleware(['farmer']), productController.deleteProduct)
 
 module.exports = router

@@ -4,7 +4,7 @@ const { authMiddleware, roleMiddleware } = require('../../middleware/authMiddlew
 
 const router = express.Router()
 
-router.get('/profile', authMiddleware, userController.getUserProfile)
+router.get('/profile/:id', authMiddleware, userController.getUserProfile)
 router.put('/profile', authMiddleware, userController.updateUserProfile)
 router.get('/', authMiddleware, roleMiddleware(['admin']), userController.getAllUsers)
 router.delete('/:id', authMiddleware, roleMiddleware(['admin']), userController.deleteUser)

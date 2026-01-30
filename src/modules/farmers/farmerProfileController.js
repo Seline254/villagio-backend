@@ -1,39 +1,50 @@
-const { FarmerProfile } = require('../../models/farmerProfileDB')
-const { User } = require('../../models/userDB')
+const path = require('path');
+const fs = require('fs');
+const { FarmerProfile } = require('../../models/farmerProfileDB');
+const {User}  = require('../../models/userDB');
 
-// Create or update farmer profile
 exports.createOrUpdateFarmerProfile = async (req, res) => {
     try {
-        const farmerId = req.user.userId
-        const { farmName, businessName, farmLocation, farmSize, categoriesDealtWith, aboutFarm } = req.body
+        const farmerId = req.user.userId;
+        console.log(farmerId)
+        const { farmName, businessName, farmLocation, farmSize, categoriesDealtWith, aboutFarm } = req.body;
 
-        // Check if user is a farmer
-        const user = await User.findById(farmerId)
-        if (!user || user.userType !== 'farmer') {
-            return res.status(403).json({ message: 'Only farmers can manage farm profiles' })
+        // 1. Image Handling
+        let farmImage = null;
+        if (req.file) {
+            const ext = path.extname(req.file.originalname); 
+            const newFilename = Date.now() + ext;
+            const newPath = path.join("uploads", newFilename);
+            
+            // Move file from temporary multer destination to our uploads folder
+            fs.renameSync(req.file.path, newPath);
+            
+            // Clean the path for the database (convert backslashes to forward slashes)
+            farmImage = newPath.replace(/\\/g, "/");
         }
 
-        // Validate required fields
-        if (!farmName || !farmLocation || !farmSize || !categoriesDealtWith || !aboutFarm) {
-            return res.status(400).json({ message: 'All required fields must be provided' })
-        }
-
-        // Check if profile exists
-        let profile = await FarmerProfile.findOne({ farmer: farmerId })
+        // 2. Profile Logic
+        const profile = await FarmerProfile.findOne({ farmer: farmerId });
 
         if (profile) {
-            // Update existing
-            profile.farmName = farmName
-            profile.businessName = businessName
-            profile.farmLocation = farmLocation
-            profile.farmSize = farmSize
-            profile.categoriesDealtWith = categoriesDealtWith
-            profile.aboutFarm = aboutFarm
-            profile.updatedAt = Date.now()
-            await profile.save()
-            res.status(200).json({ message: 'Farmer profile updated successfully', profile })
+            // Update
+            profile.farmName = farmName;
+            profile.businessName = businessName;
+            profile.farmLocation = farmLocation;
+            profile.farmSize = farmSize;
+            profile.categoriesDealtWith = categoriesDealtWith;
+            profile.aboutFarm = aboutFarm;
+            
+            // Only update the photo if a new one was uploaded
+            if (farmImage) {
+                profile.farmImage = farmImage;
+            }
+
+            profile.updatedAt = Date.now();
+            await profile.save();
+            res.status(200).json({ message: 'Updated successfully', profile });
         } else {
-            // Create new
+            // Create
             const newProfile = new FarmerProfile({
                 farmer: farmerId,
                 farmName,
@@ -41,15 +52,17 @@ exports.createOrUpdateFarmerProfile = async (req, res) => {
                 farmLocation,
                 farmSize,
                 categoriesDealtWith,
-                aboutFarm
-            })
-            await newProfile.save()
-            res.status(201).json({ message: 'Farmer profile created successfully', profile: newProfile })
+                aboutFarm,
+                farmImage // Save the processed path
+            });
+            await newProfile.save();
+            res.status(201).json({ message: 'Created successfully', profile: newProfile });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message });
     }
-}
+};
+
 
 // Get farmer profile
 exports.getFarmerProfile = async (req, res) => {
@@ -59,7 +72,7 @@ exports.getFarmerProfile = async (req, res) => {
         const profile = await FarmerProfile.findOne({ farmer: farmerId }).populate('farmer', 'name email')
 
         if (!profile) {
-            return res.status(404).json({ message: 'Farmer profile not found' })
+            return res.status(200).json({ message: 'No profile created yet' })
         }
 
         // Only the farmer themselves or admin can view

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const {User} = require('./userDB')
 
 const farmerProfileSchema = new mongoose.Schema({
     farmer: {
@@ -10,6 +11,10 @@ const farmerProfileSchema = new mongoose.Schema({
     farmName: {
         type: String,
         required: true
+    },
+    farmImage: {
+        type: String,
+        default: ''
     },
     businessName: {
         type: String
